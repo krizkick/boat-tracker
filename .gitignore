@@ -1,3 +1,5 @@
 .env
 .vscode/
 .venv/
+hjelpeprogram/
+__pycache__/
