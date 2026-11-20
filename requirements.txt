@@ -1,0 +1,5 @@
+matplotlib
+cartopy
+pillow
+python-dotenv
+requests

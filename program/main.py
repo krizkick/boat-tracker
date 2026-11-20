@@ -23,7 +23,7 @@ def hent_api_json(token):
     postheader =   {"Authorization" : f"Bearer {token}",
                     "Accept" : "application/json",
                     "Content-Type" : "application/json"}
-    postdata = {"mmsi": [258509000]}#[int(os.environ["MMSI"])]}
+    postdata = {"mmsi": [int(os.environ["MMSI"])]}
 
     hent_ais_post = requests.post(
         posturl,

@@ -1,0 +1,6 @@
+services:
+  minapp:
+    build: .
+    image: boat-tracker
+    env_file: .env
+    restart: unless-stopped
