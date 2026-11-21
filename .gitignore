@@ -5,3 +5,4 @@ hjelpeprogram/
 __pycache__/
 kart.*
 version.txt
+secrets.py
