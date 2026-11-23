@@ -47,10 +47,6 @@ def oppdater_bilde():
     time.sleep(10)
     epd.sleep()
 
-np = NeoPixel(Pin(48), 1)
-np[0] = (0, 5, 0)
-np.write()
-
 
 print("starter nettverk")
 koble_til_wifi()
@@ -61,5 +57,4 @@ if ny is not None:
     print("oppdaterer bilde")
     oppdater_bilde()
     RTC().memory(str(ny).encode())
-print("sove")
 deepsleep(300000)
