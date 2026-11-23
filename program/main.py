@@ -2,68 +2,68 @@ import requests
 from dotenv import load_dotenv
 from boat import Boat
 import os
-from lag_kart import lag_kart
+from map import create_map
 import time
 
 load_dotenv()
 
 
-def hent_api_token():
-    tokenurl = "https://id.barentswatch.no/connect/token"
-    tokenheader = {"Content-Type": "application/x-www-form-urlencoded"}
-    tokendata = {"client_id":os.environ["CLIENT_ID"],
+def fetch_api_token():
+    token_url = "https://id.barentswatch.no/connect/token"
+    token_header = {"Content-Type": "application/x-www-form-urlencoded"}
+    token_data = {"client_id":os.environ["CLIENT_ID"],
             "scope": "ais",
                 "client_secret":os.environ["CLIENT_SECRET"],
                 "grant_type":"client_credentials"}
-    hent_token_post = requests.post(tokenurl, headers=tokenheader, data=tokendata)
-    return hent_token_post.json()["access_token"]
+    fetch_token_post = requests.post(token_url, headers=token_header, data=token_data)
+    return fetch_token_post.json()["access_token"]
 
-def hent_api_json(token):
-    posturl = "https://live.ais.barentswatch.no/v1/latest/combined"
-    postheader =   {"Authorization" : f"Bearer {token}",
+def fetch_api_json(token):
+    post_url = "https://live.ais.barentswatch.no/v1/latest/combined"
+    post_header =   {"Authorization" : f"Bearer {token}",
                     "Accept" : "application/json",
                     "Content-Type" : "application/json"}
-    postdata = {"mmsi": [int(os.environ["MMSI"])]}
+    post_data = {"mmsi": [int(os.environ["MMSI"])]}
 
-    hent_ais_post = requests.post(
-        posturl,
-        headers=postheader,
-        json=postdata)
-    if hent_ais_post.json() == []:
+    fetch_ais_post = requests.post(
+        post_url,
+        headers=post_header,
+        json=post_data)
+    if fetch_ais_post.json() == []:
         return None
     else:
-        return hent_ais_post.json()[0]
+        return fetch_ais_post.json()[0]
 
-def last_opp(navn, data):
-    r = requests.put(f"{os.environ["AZURE_CONNECTION_STRING"]}/{navn}{os.environ["AZURE_SAS_TOKEN"]}",\
+def upload(name, data):
+    r = requests.put(f"{os.environ["AZURE_CONNECTION_STRING"]}/{name}{os.environ["AZURE_SAS_TOKEN"]}",\
                     data=data, headers={"x-ms-blob-type": "BlockBlob"},\
                     timeout=30)
 
-def hovedprogram():
-    kamilla = Boat()
+def main():
+    boat = Boat()
     is_running = True
 
     while is_running:
-        token = hent_api_token()
-        json = hent_api_json(token)
+        token = fetch_api_token()
+        json = fetch_api_json(token)
         if json is not None:
-            kamilla.oppdater_info(json["msgtime"],
+            boat.update_info(json["msgtime"],
                         lat=json["latitude"],
                         long=json["longitude"],
                         speed=json["speedOverGround"],
-                        retning=json["courseOverGround"])
+                        direction=json["courseOverGround"])
 
-            lag_kart(kamilla, SIZE_KM=25, WIDTH=400, HEIGHT=300)
-            with open("version.txt", "w") as versjon:
-                with open("kart.bin", "rb") as kart:
-                    data = kart.read()
-                    last_opp("kart.bin", data)
-                    hashdata = str(hash(data))
-                    last_opp("versjon.txt", hashdata)
-                    versjon.write(hashdata)
+            create_map(boat, SIZE_KM=25, WIDTH=400, HEIGHT=300)
+            with open("version.txt", "w") as version:
+                with open("kart.bin", "rb") as map_file:
+                    data = map_file.read()
+                    upload("kart.bin", data)
+                    hash_data = str(hash(data))
+                    upload("versjon.txt", hash_data)
+                    version.write(hash_data)
             print("ferdig")
             time.sleep(300)
         else:
             time.sleep(3600)
 
-hovedprogram()
+main()
