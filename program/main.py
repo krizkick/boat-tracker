@@ -62,6 +62,8 @@ def hovedprogram():
                     last_opp("versjon.txt", hashdata)
                     versjon.write(hashdata)
             print("ferdig")
-        time.sleep(3600)
+            time.sleep(300)
+        else:
+            time.sleep(3600)
 
 hovedprogram()
