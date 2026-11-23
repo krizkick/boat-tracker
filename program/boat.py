@@ -25,31 +25,31 @@ class Boat:
     def course(self):
         return self._course
 
-    def oppdater_info(self, msgtime, lat=None, long=None, speed=None, retning=None):
-        if self._msgtime == msgtime:
+    def update_info(self, msg_time, lat=None, long=None, speed=None, direction=None):
+        if self._msgtime == msg_time:
             return False
-        self._msgtime = msgtime
-        if self._nyinfo(lat):
+        self._msgtime = msg_time
+        if self._has_new_info(lat):
             self._latitude = lat
-        if self._nyinfo(long):
+        if self._has_new_info(long):
             self._longitude = long
-        if self._nyinfo(speed) and speed < 102.3:      # AIS: 102.3 = ukjent fart
+        if self._has_new_info(speed) and speed < 102.3:      # AIS: 102.3 = ukjent fart
             self._speed = speed
-        if self._nyinfo(retning) and retning < 360:    # AIS: 360 = ukjent kurs
-            self._course = retning
+        if self._has_new_info(direction) and direction < 360:    # AIS: 360 = ukjent kurs
+            self._course = direction
         return True
 
-    def _nyinfo(self, var):
-        return var is not None
+    def _has_new_info(self, value):
+        return value is not None
 
-    def boat_future_position(self, minutter: int):
-        distanse = self._speed * minutter / 3600       # grader (1 nm = 1/60 grad)
-        ny_breddegrad = self._latitude + distanse * math.cos(math.radians(self._course))
-        ny_lengdegrad = self._longitude + distanse * math.sin(math.radians(self._course)) / math.cos(math.radians(self._latitude))
+    def boat_future_position(self, minutes: int):
+        distance = self._speed * minutes / 3600       # grader (1 nm = 1/60 grad)
+        new_latitude = self._latitude + distance * math.cos(math.radians(self._course))
+        new_longitude = self._longitude + distance * math.sin(math.radians(self._course)) / math.cos(math.radians(self._latitude))
         return {
-            "future_latitude": ny_breddegrad,
-            "future_longitude": ny_lengdegrad,
+            "future_latitude": new_latitude,
+            "future_longitude": new_longitude,
             "latitude": self._latitude,
             "longitude": self._longitude,
-            "minutter": minutter,
+            "minutes": minutes,
         }
